@@ -26,7 +26,7 @@
 ######################################################################
 
 # script config-file
-SCRIPTCONF=/etc/conf.d/privoxy-blacklist
+SCRIPTCONF=/etc/privoxy-blacklist
 # dependencies
 DEPENDS=( 'privoxy' 'sed' 'grep' 'bash' 'wget' )
 
@@ -79,6 +79,7 @@ function main()
     file=${TMPDIR}/$(basename ${url})
     actionfile=${file%\.*}.script.action
     filterfile=${file%\.*}.script.filter
+    basefilter=$(basename ${filterfile})
     list=$(basename ${file%\.*})
 
     # download list
@@ -151,7 +152,11 @@ function main()
 
     # install Privoxy filterfile
     install -o ${PRIVOXY_USER} -g ${PRIVOXY_GROUP} ${VERBOSE} ${filterfile} ${PRIVOXY_DIR}
-    if $(grep $(basename ${filterfile}) ${PRIVOXY_CONF})
+    echo "---------"
+    echo grep $basefilter ${PRIVOXY_CONF}
+    grep $basefilter ${PRIVOXY_CONF}
+    echo "---------"
+    if ( grep $basefilter ${PRIVOXY_CONF} );
     then
       debug "\nModifying ${PRIVOXY_CONF} ..." 0
       sed "s/^\(#*\)filterfile user\.filter/filterfile $(basename ${filterfile})\n\1filterfile user.filter/" ${PRIVOXY_CONF} > ${TMPDIR}/config
